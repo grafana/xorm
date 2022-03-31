@@ -142,6 +142,13 @@ func (session *Session) insertMultipleStruct(rowsSlicePtr interface{}) (int64, e
 			if len(session.statement.ColumnMap) > 0 && !session.statement.ColumnMap.Contain(col.Name) {
 				continue
 			}
+			// !satorunooshie! set fieldValue as nil when column is nullable and zero-value
+			if _, ok := getFlagForColumn(session.statement.NullableMap, col); ok {
+				if col.Nullable && utils.IsValueZero(fieldValue) {
+					var nilValue *int
+					fieldValue = reflect.ValueOf(nilValue)
+				}
+			}
 			if (col.IsCreated || col.IsUpdated) && session.statement.UseAutoTime {
 				val, t, err := session.engine.nowTime(col)
 				if err != nil {
