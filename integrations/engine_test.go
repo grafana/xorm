@@ -14,6 +14,7 @@ import (
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
 
+	_ "gitee.com/travelliu/dm"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -52,17 +53,18 @@ func TestAutoTransaction(t *testing.T) {
 		Created time.Time `xorm:"created"`
 	}
 
-	assert.NoError(t, testEngine.Sync2(new(TestTx)))
+	assert.NoError(t, testEngine.Sync(new(TestTx)))
 
 	engine := testEngine.(*xorm.Engine)
 
 	// will success
-	engine.Transaction(func(session *xorm.Session) (interface{}, error) {
+	_, err := engine.Transaction(func(session *xorm.Session) (interface{}, error) {
 		_, err := session.Insert(TestTx{Msg: "hi"})
 		assert.NoError(t, err)
 
 		return nil, nil
 	})
+	assert.NoError(t, err)
 
 	has, err := engine.Exist(&TestTx{Msg: "hi"})
 	assert.NoError(t, err)
@@ -86,7 +88,7 @@ func assertSync(t *testing.T, beans ...interface{}) {
 	for _, bean := range beans {
 		t.Run(testEngine.TableName(bean, true), func(t *testing.T) {
 			assert.NoError(t, testEngine.DropTables(bean))
-			assert.NoError(t, testEngine.Sync2(bean))
+			assert.NoError(t, testEngine.Sync(bean))
 		})
 	}
 }
@@ -134,11 +136,14 @@ func TestDump(t *testing.T) {
 	}
 }
 
+var dbtypes = []schemas.DBType{schemas.SQLITE, schemas.MYSQL, schemas.POSTGRES, schemas.MSSQL}
+
 func TestDumpTables(t *testing.T) {
 	assert.NoError(t, PrepareEngine())
 
 	type TestDumpTableStruct struct {
 		Id      int64
+		Data    []byte `xorm:"BLOB"`
 		Name    string
 		IsMan   bool
 		Created time.Time `xorm:"created"`
@@ -146,13 +151,18 @@ func TestDumpTables(t *testing.T) {
 
 	assertSync(t, new(TestDumpTableStruct))
 
-	testEngine.Insert([]TestDumpTableStruct{
+	_, err := testEngine.Insert([]TestDumpTableStruct{
 		{Name: "1", IsMan: true},
-		{Name: "2\n"},
-		{Name: "3;"},
-		{Name: "4\n;\n''"},
-		{Name: "5'\n"},
+		{Name: "2\n", Data: []byte{'\000', '\001', '\002'}},
+		{Name: "3;", Data: []byte("0x000102")},
+		{Name: "4\n;\n''", Data: []byte("Help")},
+		{Name: "5'\n", Data: []byte("0x48656c70")},
+		{Name: "6\\n'\n", Data: []byte("48656c70")},
+		{Name: "7\\n'\r\n", Data: []byte("7\\n'\r\n")},
+		{Name: "x0809ee"},
+		{Name: "090a10"},
 	})
+	assert.NoError(t, err)
 
 	fp := fmt.Sprintf("%v-table.sql", testEngine.Dialect().URI().DBType)
 	os.Remove(fp)
@@ -169,7 +179,7 @@ func TestDumpTables(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NoError(t, sess.Commit())
 
-	for _, tp := range []schemas.DBType{schemas.SQLITE, schemas.MYSQL, schemas.POSTGRES, schemas.MSSQL} {
+	for _, tp := range dbtypes {
 		name := fmt.Sprintf("dump_%v-table.sql", tp)
 		t.Run(name, func(t *testing.T) {
 			assert.NoError(t, testEngine.(*xorm.Engine).DumpTablesToFile([]*schemas.Table{tb}, name, tp))
