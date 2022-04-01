@@ -142,8 +142,13 @@ func TestInsert(t *testing.T) {
 	assert.NoError(t, PrepareEngine())
 	assertSync(t, new(Userinfo))
 
-	user := Userinfo{0, "xiaolunwen", "dev", "lunny", time.Now(),
-		Userdetail{Id: 1}, 1.78, []byte{1, 2, 3}, true}
+	user := Userinfo{
+		0, "xiaolunwen", "dev", "lunny", time.Now(),
+		Userdetail{Id: 1},
+		1.78,
+		[]byte{1, 2, 3},
+		true,
+	}
 	cnt, err := testEngine.Insert(&user)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, cnt, "insert not returned 1")
@@ -161,8 +166,10 @@ func TestInsertAutoIncr(t *testing.T) {
 	assertSync(t, new(Userinfo))
 
 	// auto increment insert
-	user := Userinfo{Username: "xiaolunwen2", Departname: "dev", Alias: "lunny", Created: time.Now(),
-		Detail: Userdetail{Id: 1}, Height: 1.78, Avatar: []byte{1, 2, 3}, IsMan: true}
+	user := Userinfo{
+		Username: "xiaolunwen2", Departname: "dev", Alias: "lunny", Created: time.Now(),
+		Detail: Userdetail{Id: 1}, Height: 1.78, Avatar: []byte{1, 2, 3}, IsMan: true,
+	}
 	cnt, err := testEngine.Insert(&user)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, cnt)
@@ -184,7 +191,7 @@ func TestInsertDefault(t *testing.T) {
 	err := testEngine.Sync(di)
 	assert.NoError(t, err)
 
-	var di2 = DefaultInsert{Name: "test"}
+	di2 := DefaultInsert{Name: "test"}
 	_, err = testEngine.Omit(testEngine.GetColumnMapper().Obj2Table("Status")).Insert(&di2)
 	assert.NoError(t, err)
 
@@ -210,7 +217,7 @@ func TestInsertDefault2(t *testing.T) {
 	err := testEngine.Sync(di)
 	assert.NoError(t, err)
 
-	var di2 = DefaultInsert2{Name: "test"}
+	di2 := DefaultInsert2{Name: "test"}
 	_, err = testEngine.Omit(testEngine.GetColumnMapper().Obj2Table("CheckTime")).Insert(&di2)
 	assert.NoError(t, err)
 
@@ -230,14 +237,14 @@ func TestInsertDefault3(t *testing.T) {
 		Name    string    `xorm:"not null default '' VARCHAR(255)"`
 		Ip      string    `xorm:"not null default '' VARCHAR(255)"`
 		Created time.Time `xorm:"not null default CURRENT_TIMESTAMP TIMESTAMP"`
-		Updated time.Time `xorm:"not null default '0000-00-00 00:00:00' TIMESTAMP"`
+		Updated time.Time `xorm:"not null default '1970-01-01 00:00:00' TIMESTAMP"`
 	}
 
 	di := new(DefaultInsert3)
 	err := testEngine.Sync(di)
 	assert.NoError(t, err)
 
-	var di2 = DefaultInsert3{Name: "test"}
+	di2 := DefaultInsert3{Name: "test"}
 	_, err = testEngine.Insert(&di2)
 	assert.NoError(t, err)
 
@@ -460,7 +467,7 @@ func TestCreatedJsonTime(t *testing.T) {
 	assert.True(t, has)
 	assert.EqualValues(t, time.Time(ci5.Created).Unix(), time.Time(di5.Created).Unix())
 
-	var dis = make([]MyJSONTime, 0)
+	dis := make([]MyJSONTime, 0)
 	err = testEngine.Find(&dis)
 	assert.NoError(t, err)
 }
@@ -783,7 +790,7 @@ func TestInsertWhere(t *testing.T) {
 	assert.NoError(t, PrepareEngine())
 	assertSync(t, new(InsertWhere))
 
-	var i = InsertWhere{
+	i := InsertWhere{
 		RepoId: 1,
 		Width:  10,
 		Height: 20,
@@ -893,7 +900,7 @@ func TestInsertExpr2(t *testing.T) {
 
 	assertSync(t, new(InsertExprsRelease))
 
-	var ie = InsertExprsRelease{
+	ie := InsertExprsRelease{
 		RepoId: 1,
 		IsTag:  true,
 	}
@@ -1068,7 +1075,7 @@ func TestInsertIntSlice(t *testing.T) {
 
 	assert.NoError(t, testEngine.Sync(new(InsertIntSlice)))
 
-	var v = InsertIntSlice{
+	v := InsertIntSlice{
 		NameIDs: []int{1, 2},
 	}
 	cnt, err := testEngine.Insert(&v)
@@ -1085,7 +1092,7 @@ func TestInsertIntSlice(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, cnt)
 
-	var v3 = InsertIntSlice{
+	v3 := InsertIntSlice{
 		NameIDs: nil,
 	}
 	cnt, err = testEngine.Insert(&v3)
