@@ -1354,6 +1354,14 @@ func (db *postgres) CreateTableSQL(ctx context.Context, queryer core.Queryer, ta
 		commentSQL += fmt.Sprintf("COMMENT ON TABLE %s IS '%s'", quoter.Quote(tableName), table.Comment)
 	}
 
+	for _, colName := range table.ColumnsSeq() {
+		col := table.GetColumn(colName)
+
+		if len(col.Comment) > 0 {
+			commentSQL += fmt.Sprintf("COMMENT ON COLUMN %s.%s IS '%s'", quoter.Quote(tableName), quoter.Quote(col.Name), col.Comment)
+		}
+	}
+
 	return createTableSQL + commentSQL, true, nil
 }
 

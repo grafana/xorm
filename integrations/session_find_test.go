@@ -40,14 +40,14 @@ func TestJoinLimit(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, cnt)
 
-	var checklist = CheckList{
+	checklist := CheckList{
 		Eid: emp.Id,
 	}
 	cnt, err = testEngine.Insert(&checklist)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, cnt)
 
-	var salary = Salary{
+	salary := Salary{
 		Lid: checklist.Id,
 	}
 	cnt, err = testEngine.Insert(&salary)
@@ -89,7 +89,7 @@ func TestFind(t *testing.T) {
 	assert.NoError(t, err)
 
 	users2 := make([]Userinfo, 0)
-	var tbName = testEngine.Quote(testEngine.TableName(new(Userinfo), true))
+	tbName := testEngine.Quote(testEngine.TableName(new(Userinfo), true))
 	err = testEngine.SQL("select * from " + tbName).Find(&users2)
 	assert.NoError(t, err)
 }
@@ -119,7 +119,7 @@ func (TeamUser) TableName() string {
 }
 
 func TestFind3(t *testing.T) {
-	var teamUser = new(TeamUser)
+	teamUser := new(TeamUser)
 	assert.NoError(t, PrepareEngine())
 	err := testEngine.Sync(new(Team), teamUser)
 	assert.NoError(t, err)
@@ -426,7 +426,7 @@ func TestFindBool(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, 2, cnt)
 
-	var results = make([]FindBoolStruct, 0, 2)
+	results := make([]FindBoolStruct, 0, 2)
 	err = testEngine.Find(&results)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 2, len(results))
@@ -457,7 +457,7 @@ func TestFindMark(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, 2, cnt)
 
-	var results = make([]Mark, 0, 2)
+	results := make([]Mark, 0, 2)
 	err = testEngine.Find(&results)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 2, len(results))
@@ -486,7 +486,7 @@ func TestFindAndCountOneFunc(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, 2, cnt)
 
-	var results = make([]FindAndCountStruct, 0, 2)
+	results := make([]FindAndCountStruct, 0, 2)
 	cnt, err = testEngine.Limit(1).FindAndCount(&results)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, len(results))
@@ -611,14 +611,14 @@ func TestFindAndCount2(t *testing.T) {
 	assert.NoError(t, PrepareEngine())
 	assertSync(t, new(TestFindAndCountUser), new(TestFindAndCountHotel))
 
-	var u = TestFindAndCountUser{
+	u := TestFindAndCountUser{
 		Name: "myname",
 	}
 	cnt, err := testEngine.Insert(&u)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, cnt)
 
-	var hotel = TestFindAndCountHotel{
+	hotel := TestFindAndCountHotel{
 		Name:     "myhotel",
 		Code:     "111",
 		Region:   "222",
@@ -1063,7 +1063,7 @@ func TestUpdateFind(t *testing.T) {
 	session := testEngine.NewSession()
 	defer session.Close()
 
-	var tuf = TestUpdateFind{
+	tuf := TestUpdateFind{
 		Name: "test",
 	}
 	_, err := session.Insert(&tuf)
@@ -1095,7 +1095,7 @@ func TestFindAnonymousStruct(t *testing.T) {
 	assert.EqualValues(t, 1, cnt)
 	assert.NoError(t, err)
 
-	var findRes = make([]struct {
+	findRes := make([]struct {
 		Id   int64
 		Name string
 	}, 0)
@@ -1114,4 +1114,76 @@ func TestFindAnonymousStruct(t *testing.T) {
 	assert.EqualValues(t, 1, len(findRes))
 	assert.EqualValues(t, 1, findRes[0].Id)
 	assert.EqualValues(t, "xlw", findRes[0].Name)
+}
+
+func TestFindBytesVars(t *testing.T) {
+	type FindBytesVars struct {
+		Id     int64
+		Bytes1 []byte
+		Bytes2 []byte
+	}
+
+	assert.NoError(t, PrepareEngine())
+	assertSync(t, new(FindBytesVars))
+
+	_, err := testEngine.Insert([]FindBytesVars{
+		{
+			Bytes1: []byte("bytes1"),
+			Bytes2: []byte("bytes2"),
+		},
+		{
+			Bytes1: []byte("bytes1-1"),
+			Bytes2: []byte("bytes2-2"),
+		},
+	})
+	assert.NoError(t, err)
+
+	var gbv []FindBytesVars
+	err = testEngine.Find(&gbv)
+	assert.NoError(t, err)
+	assert.EqualValues(t, 2, len(gbv))
+	assert.EqualValues(t, []byte("bytes1"), gbv[0].Bytes1)
+	assert.EqualValues(t, []byte("bytes2"), gbv[0].Bytes2)
+	assert.EqualValues(t, []byte("bytes1-1"), gbv[1].Bytes1)
+	assert.EqualValues(t, []byte("bytes2-2"), gbv[1].Bytes2)
+
+	err = testEngine.Find(&gbv)
+	assert.NoError(t, err)
+	assert.EqualValues(t, 4, len(gbv))
+	assert.EqualValues(t, []byte("bytes1"), gbv[0].Bytes1)
+	assert.EqualValues(t, []byte("bytes2"), gbv[0].Bytes2)
+	assert.EqualValues(t, []byte("bytes1-1"), gbv[1].Bytes1)
+	assert.EqualValues(t, []byte("bytes2-2"), gbv[1].Bytes2)
+	assert.EqualValues(t, []byte("bytes1"), gbv[2].Bytes1)
+	assert.EqualValues(t, []byte("bytes2"), gbv[2].Bytes2)
+	assert.EqualValues(t, []byte("bytes1-1"), gbv[3].Bytes1)
+	assert.EqualValues(t, []byte("bytes2-2"), gbv[3].Bytes2)
+}
+
+func TestUpdateFindDate(t *testing.T) {
+	type TestUpdateFindDate struct {
+		Id   int64
+		Name string
+		Tm   time.Time `xorm:"DATE created"`
+	}
+
+	assert.NoError(t, PrepareEngine())
+	assertSync(t, new(TestUpdateFindDate))
+
+	session := testEngine.NewSession()
+	defer session.Close()
+
+	tuf := TestUpdateFindDate{
+		Name: "test",
+	}
+	_, err := session.Insert(&tuf)
+	assert.NoError(t, err)
+	_, err = session.Where("`id` = ?", tuf.Id).Update(&TestUpdateFindDate{})
+	assert.EqualError(t, xorm.ErrNoColumnsTobeUpdated, err.Error())
+
+	var tufs []TestUpdateFindDate
+	err = session.Find(&tufs)
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, len(tufs))
+	assert.EqualValues(t, tuf.Tm.Format("2006-01-02"), tufs[0].Tm.Format("2006-01-02"))
 }

@@ -30,7 +30,7 @@ func TestArrayField(t *testing.T) {
 
 	assert.NoError(t, testEngine.Sync(new(ArrayStruct)))
 
-	var as = ArrayStruct{
+	as := ArrayStruct{
 		Name: [20]byte{
 			96, 96, 96, 96, 96,
 			96, 96, 96, 96, 96,
@@ -54,7 +54,7 @@ func TestArrayField(t *testing.T) {
 	assert.EqualValues(t, 1, len(arrs))
 	assert.Equal(t, as.Name, arrs[0].Name)
 
-	var newName = [20]byte{
+	newName := [20]byte{
 		90, 96, 96, 96, 96,
 		96, 96, 96, 96, 96,
 		96, 96, 96, 96, 96,
@@ -252,9 +252,11 @@ func TestConversion(t *testing.T) {
 	assert.Nil(t, c1.Nullable2)
 }
 
-type MyInt int
-type MyUInt uint
-type MyFloat float64
+type (
+	MyInt   int
+	MyUInt  uint
+	MyFloat float64
+)
 
 type MyStruct struct {
 	Type      MyInt
@@ -273,7 +275,7 @@ type MyStruct struct {
 	UIA32     []uint32
 	UIA64     []uint64
 	UI        uint
-	//C64       complex64
+	// C64       complex64
 	MSS map[string]string
 }
 
@@ -303,6 +305,13 @@ func TestCustomType1(t *testing.T) {
 	cnt, err := testEngine.Insert(&i)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, cnt)
+
+	// since mssql don't support use text as index condition, we have to ignore below
+	// get and find tests
+	if testEngine.Dialect().URI().DBType == schemas.MSSQL {
+		t.Skip()
+		return
+	}
 
 	fmt.Println(i)
 	i.NameArray = []string{}
@@ -598,7 +607,7 @@ func TestMyArray(t *testing.T) {
 	assert.NoError(t, PrepareEngine())
 	assertSync(t, new(MyArrayStruct))
 
-	var v = [20]byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+	v := [20]byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	_, err := testEngine.Insert(&MyArrayStruct{
 		Content: v,
 	})
