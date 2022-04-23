@@ -70,7 +70,7 @@ func TestRows(t *testing.T) {
 	}
 	assert.EqualValues(t, 1, cnt)
 
-	var tbName = testEngine.Quote(testEngine.TableName(user, true))
+	tbName := testEngine.Quote(testEngine.TableName(user, true))
 	rows2, err := testEngine.SQL("SELECT * FROM " + tbName).Rows(new(UserRows))
 	assert.NoError(t, err)
 	defer rows2.Close()
@@ -92,7 +92,7 @@ func TestRowsMyTableName(t *testing.T) {
 		IsMan bool
 	}
 
-	var tableName = "user_rows_my_table_name"
+	tableName := "user_rows_my_table_name"
 
 	assert.NoError(t, testEngine.Table(tableName).Sync(new(UserRowsMyTable)))
 
@@ -205,4 +205,76 @@ func TestRowsScanVars(t *testing.T) {
 	}
 	assert.NoError(t, rows.Err())
 	assert.EqualValues(t, 2, cnt)
+}
+
+func TestRowsScanBytes(t *testing.T) {
+	type RowsScanBytes struct {
+		Id     int64
+		Bytes1 []byte
+		Bytes2 []byte
+	}
+
+	assert.NoError(t, PrepareEngine())
+	assert.NoError(t, testEngine.Sync(new(RowsScanBytes)))
+
+	cnt, err := testEngine.Insert(&RowsScanBytes{
+		Bytes1: []byte("bytes1"),
+		Bytes2: []byte("bytes2"),
+	}, &RowsScanBytes{
+		Bytes1: []byte("bytes1-1"),
+		Bytes2: []byte("bytes2-2"),
+	})
+	assert.NoError(t, err)
+	assert.EqualValues(t, 2, cnt)
+
+	{
+		rows, err := testEngine.Cols("bytes1, bytes2").Rows(new(RowsScanBytes))
+		assert.NoError(t, err)
+		defer rows.Close()
+
+		cnt = 0
+		var bytes1 []byte
+		var bytes2 []byte
+		for rows.Next() {
+			err = rows.Scan(&bytes1, &bytes2)
+			assert.NoError(t, err)
+			if cnt == 0 {
+				assert.EqualValues(t, []byte("bytes1"), bytes1)
+				assert.EqualValues(t, []byte("bytes2"), bytes2)
+			} else if cnt == 1 {
+				// bytes1 now should be `bytes1` but will be override
+				assert.EqualValues(t, []byte("bytes1-1"), bytes1)
+				assert.EqualValues(t, []byte("bytes2-2"), bytes2)
+			}
+			cnt++
+		}
+		assert.NoError(t, rows.Err())
+		assert.EqualValues(t, 2, cnt)
+		rows.Close()
+	}
+
+	{
+		rows, err := testEngine.Cols("bytes1, bytes2").Rows(new(RowsScanBytes))
+		assert.NoError(t, err)
+		defer rows.Close()
+
+		cnt = 0
+		var rsb RowsScanBytes
+		for rows.Next() {
+			err = rows.Scan(&rsb)
+			assert.NoError(t, err)
+			if cnt == 0 {
+				assert.EqualValues(t, []byte("bytes1"), rsb.Bytes1)
+				assert.EqualValues(t, []byte("bytes2"), rsb.Bytes2)
+			} else if cnt == 1 {
+				// bytes1 now should be `bytes1` but will be override
+				assert.EqualValues(t, []byte("bytes1-1"), rsb.Bytes1)
+				assert.EqualValues(t, []byte("bytes2-2"), rsb.Bytes2)
+			}
+			cnt++
+		}
+		assert.NoError(t, rows.Err())
+		assert.EqualValues(t, 2, cnt)
+		rows.Close()
+	}
 }

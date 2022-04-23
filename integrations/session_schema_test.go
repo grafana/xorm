@@ -6,6 +6,7 @@ package integrations
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -248,7 +249,9 @@ func TestSyncTable3(t *testing.T) {
 	tableInfo, err := testEngine.TableInfo(new(SyncTable5))
 	assert.NoError(t, err)
 	assert.EqualValues(t, testEngine.Dialect().SQLType(tableInfo.GetColumn("name")), testEngine.Dialect().SQLType(tables[0].GetColumn("name")))
-	assert.EqualValues(t, testEngine.Dialect().SQLType(tableInfo.GetColumn("text")), testEngine.Dialect().SQLType(tables[0].GetColumn("text")))
+	/* Engine.DBMetas() returns the size of the column from the database but Engine.TableInfo() might not be able to guess the column size.
+	For example using MySQL/MariaDB: when utf-8 charset is used, "`xorm:"TEXT(21846)`" creates a MEDIUMTEXT column not a TEXT column. */
+	assert.True(t, testEngine.Dialect().SQLType(tables[0].GetColumn("text")) == testEngine.Dialect().SQLType(tableInfo.GetColumn("text")) || strings.HasPrefix(testEngine.Dialect().SQLType(tables[0].GetColumn("text")), testEngine.Dialect().SQLType(tableInfo.GetColumn("text"))+"("))
 	assert.EqualValues(t, testEngine.Dialect().SQLType(tableInfo.GetColumn("char")), testEngine.Dialect().SQLType(tables[0].GetColumn("char")))
 	assert.EqualValues(t, testEngine.Dialect().SQLType(tableInfo.GetColumn("ten_char")), testEngine.Dialect().SQLType(tables[0].GetColumn("ten_char")))
 	assert.EqualValues(t, testEngine.Dialect().SQLType(tableInfo.GetColumn("ten_var_char")), testEngine.Dialect().SQLType(tables[0].GetColumn("ten_var_char")))

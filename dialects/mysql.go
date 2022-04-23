@@ -399,7 +399,7 @@ func (db *mysql) GetColumns(queryer core.Queryer, ctx context.Context, tableName
 		"(SUBSTRING_INDEX(SUBSTRING(VERSION(), 4), '.', 1) = 2 && " +
 		"SUBSTRING_INDEX(SUBSTRING(VERSION(), 6), '-', 1) >= 7)))))"
 	s := "SELECT `COLUMN_NAME`, `IS_NULLABLE`, `COLUMN_DEFAULT`, `COLUMN_TYPE`," +
-		" `COLUMN_KEY`, `EXTRA`, `COLUMN_COMMENT`, " +
+		" `COLUMN_KEY`, `EXTRA`, `COLUMN_COMMENT`, `CHARACTER_MAXIMUM_LENGTH`, " +
 		alreadyQuoted + " AS NEEDS_QUOTE " +
 		"FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ?" +
 		" ORDER BY `COLUMNS`.ORDINAL_POSITION"
@@ -418,8 +418,8 @@ func (db *mysql) GetColumns(queryer core.Queryer, ctx context.Context, tableName
 
 		var columnName, nullableStr, colType, colKey, extra, comment string
 		var alreadyQuoted, isUnsigned bool
-		var colDefault *string
-		err = rows.Scan(&columnName, &nullableStr, &colDefault, &colType, &colKey, &extra, &comment, &alreadyQuoted)
+		var colDefault, maxLength *string
+		err = rows.Scan(&columnName, &nullableStr, &colDefault, &colType, &colKey, &extra, &comment, &maxLength, &alreadyQuoted)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -476,6 +476,14 @@ func (db *mysql) GetColumns(queryer core.Queryer, ctx context.Context, tableName
 					if err != nil {
 						return nil, nil, err
 					}
+				}
+			}
+		} else {
+			switch colType {
+			case "MEDIUMTEXT", "LONGTEXT", "TEXT":
+				len1, err = strconv.Atoi(*maxLength)
+				if err != nil {
+					return nil, nil, err
 				}
 			}
 		}

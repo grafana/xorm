@@ -35,7 +35,7 @@ func TestGetVar(t *testing.T) {
 
 	assert.NoError(t, testEngine.Sync(new(GetVar)))
 
-	var data = GetVar{
+	data := GetVar{
 		Msg:   "hi",
 		Age:   28,
 		Money: 1.5,
@@ -175,7 +175,7 @@ func TestGetVar(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, false, has)
 
-	var valuesString = make(map[string]string)
+	valuesString := make(map[string]string)
 	has, err = testEngine.Table("get_var").Get(&valuesString)
 	assert.NoError(t, err)
 	assert.Equal(t, true, has)
@@ -187,7 +187,7 @@ func TestGetVar(t *testing.T) {
 
 	// for mymysql driver, interface{} will be []byte, so ignore it currently
 	if testEngine.DriverName() != "mymysql" {
-		var valuesInter = make(map[string]interface{})
+		valuesInter := make(map[string]interface{})
 		has, err = testEngine.Table("get_var").Where("`id` = ?", 1).Select("*").Get(&valuesInter)
 		assert.NoError(t, err)
 		assert.Equal(t, true, has)
@@ -198,7 +198,7 @@ func TestGetVar(t *testing.T) {
 		assert.Equal(t, "1.5", fmt.Sprintf("%v", valuesInter["money"]))
 	}
 
-	var valuesSliceString = make([]string, 5)
+	valuesSliceString := make([]string, 5)
 	has, err = testEngine.Table("get_var").Get(&valuesSliceString)
 	assert.NoError(t, err)
 	assert.Equal(t, true, has)
@@ -207,7 +207,7 @@ func TestGetVar(t *testing.T) {
 	assert.Equal(t, "28", valuesSliceString[2])
 	assert.Equal(t, "1.5", valuesSliceString[3])
 
-	var valuesSliceInter = make([]interface{}, 5)
+	valuesSliceInter := make([]interface{}, 5)
 	has, err = testEngine.Table("get_var").Get(&valuesSliceInter)
 	assert.NoError(t, err)
 	assert.Equal(t, true, has)
@@ -317,7 +317,7 @@ func TestGetMap(t *testing.T) {
 	_, err := testEngine.Exec(fmt.Sprintf("INSERT INTO %s (`is_man`) VALUES (NULL)", tableName))
 	assert.NoError(t, err)
 
-	var valuesString = make(map[string]string)
+	valuesString := make(map[string]string)
 	has, err := testEngine.Table("userinfo_map").Get(&valuesString)
 	assert.NoError(t, err)
 	assert.Equal(t, true, has)
@@ -336,7 +336,7 @@ func TestGetError(t *testing.T) {
 
 	assertSync(t, new(GetError))
 
-	var info = new(GetError)
+	info := new(GetError)
 	has, err := testEngine.Get(&info)
 	assert.False(t, has)
 	assert.Error(t, err)
@@ -456,7 +456,7 @@ func TestGetActionMapping(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	var valuesSlice = make([]string, 2)
+	valuesSlice := make([]string, 2)
 	has, err := testEngine.Table(new(ActionMapping)).
 		Cols("script_id", "rollback_id").
 		ID("1").Get(&valuesSlice)
@@ -483,7 +483,7 @@ func TestGetStructId(t *testing.T) {
 		Id int64
 	}
 
-	//var id int64
+	// var id int64
 	var maxid maxidst
 	sql := "select max(`id`) as id from " + testEngine.Quote(testEngine.TableName(&TestGetStruct{}, true))
 	has, err := testEngine.SQL(sql).Get(&maxid)
@@ -693,7 +693,7 @@ func TestCustomTypes(t *testing.T) {
 	assert.NoError(t, PrepareEngine())
 	assertSync(t, new(TestCustomizeStruct))
 
-	var s = TestCustomizeStruct{
+	s := TestCustomizeStruct{
 		Name: "test",
 		Age:  32,
 	}
@@ -763,7 +763,7 @@ func TestGetBigFloat(t *testing.T) {
 	assertSync(t, new(GetBigFloat))
 
 	{
-		var gf = GetBigFloat{
+		gf := GetBigFloat{
 			Money: big.NewFloat(999999.99),
 		}
 		_, err := testEngine.Insert(&gf)
@@ -774,8 +774,8 @@ func TestGetBigFloat(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, has)
 		assert.True(t, m.String() == gf.Money.String(), "%v != %v", m.String(), gf.Money.String())
-		//fmt.Println(m.Cmp(gf.Money))
-		//assert.True(t, m.Cmp(gf.Money) == 0, "%v != %v", m.String(), gf.Money.String())
+		// fmt.Println(m.Cmp(gf.Money))
+		// assert.True(t, m.Cmp(gf.Money) == 0, "%v != %v", m.String(), gf.Money.String())
 	}
 
 	type GetBigFloat2 struct {
@@ -788,7 +788,7 @@ func TestGetBigFloat(t *testing.T) {
 	assertSync(t, new(GetBigFloat2))
 
 	{
-		var gf2 = GetBigFloat2{
+		gf2 := GetBigFloat2{
 			Money:  big.NewFloat(9999999.99),
 			Money2: *big.NewFloat(99.99),
 		}
@@ -800,8 +800,8 @@ func TestGetBigFloat(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, has)
 		assert.True(t, m2.String() == gf2.Money.String(), "%v != %v", m2.String(), gf2.Money.String())
-		//fmt.Println(m.Cmp(gf.Money))
-		//assert.True(t, m.Cmp(gf.Money) == 0, "%v != %v", m.String(), gf.Money.String())
+		// fmt.Println(m.Cmp(gf.Money))
+		// assert.True(t, m.Cmp(gf.Money) == 0, "%v != %v", m.String(), gf.Money.String())
 
 		var gf3 GetBigFloat2
 		has, err = testEngine.ID(gf2.Id).Get(&gf3)
@@ -829,7 +829,7 @@ func TestGetDecimal(t *testing.T) {
 	assertSync(t, new(GetDecimal))
 
 	{
-		var gf = GetDecimal{
+		gf := GetDecimal{
 			Money: decimal.NewFromFloat(999999.99),
 		}
 		_, err := testEngine.Insert(&gf)
@@ -840,8 +840,8 @@ func TestGetDecimal(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, has)
 		assert.True(t, m.String() == gf.Money.String(), "%v != %v", m.String(), gf.Money.String())
-		//fmt.Println(m.Cmp(gf.Money))
-		//assert.True(t, m.Cmp(gf.Money) == 0, "%v != %v", m.String(), gf.Money.String())
+		// fmt.Println(m.Cmp(gf.Money))
+		// assert.True(t, m.Cmp(gf.Money) == 0, "%v != %v", m.String(), gf.Money.String())
 	}
 
 	type GetDecimal2 struct {
@@ -854,7 +854,7 @@ func TestGetDecimal(t *testing.T) {
 
 	{
 		v := decimal.NewFromFloat(999999.99)
-		var gf = GetDecimal2{
+		gf := GetDecimal2{
 			Money: &v,
 		}
 		_, err := testEngine.Insert(&gf)
@@ -865,10 +865,11 @@ func TestGetDecimal(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, has)
 		assert.True(t, m.String() == gf.Money.String(), "%v != %v", m.String(), gf.Money.String())
-		//fmt.Println(m.Cmp(gf.Money))
-		//assert.True(t, m.Cmp(gf.Money) == 0, "%v != %v", m.String(), gf.Money.String())
+		// fmt.Println(m.Cmp(gf.Money))
+		// assert.True(t, m.Cmp(gf.Money) == 0, "%v != %v", m.String(), gf.Money.String())
 	}
 }
+
 func TestGetTime(t *testing.T) {
 	type GetTimeStruct struct {
 		Id         int64
@@ -878,7 +879,7 @@ func TestGetTime(t *testing.T) {
 	assert.NoError(t, PrepareEngine())
 	assertSync(t, new(GetTimeStruct))
 
-	var gts = GetTimeStruct{
+	gts := GetTimeStruct{
 		CreateTime: time.Now().In(testEngine.GetTZLocation()),
 	}
 	_, err := testEngine.Insert(&gts)
@@ -975,4 +976,40 @@ func TestGetWithPrepare(t *testing.T) {
 
 	err = sess.Commit()
 	assert.NoError(t, err)
+}
+
+func TestGetBytesVars(t *testing.T) {
+	type GetBytesVars struct {
+		Id     int64
+		Bytes1 []byte
+		Bytes2 []byte
+	}
+
+	assert.NoError(t, PrepareEngine())
+	assertSync(t, new(GetBytesVars))
+
+	_, err := testEngine.Insert([]GetBytesVars{
+		{
+			Bytes1: []byte("bytes1"),
+			Bytes2: []byte("bytes2"),
+		},
+		{
+			Bytes1: []byte("bytes1-1"),
+			Bytes2: []byte("bytes2-2"),
+		},
+	})
+	assert.NoError(t, err)
+
+	var gbv GetBytesVars
+	has, err := testEngine.Asc("id").Get(&gbv)
+	assert.NoError(t, err)
+	assert.True(t, has)
+	assert.EqualValues(t, []byte("bytes1"), gbv.Bytes1)
+	assert.EqualValues(t, []byte("bytes2"), gbv.Bytes2)
+
+	has, err = testEngine.Desc("id").NoAutoCondition().Get(&gbv)
+	assert.NoError(t, err)
+	assert.True(t, has)
+	assert.EqualValues(t, []byte("bytes1-1"), gbv.Bytes1)
+	assert.EqualValues(t, []byte("bytes2-2"), gbv.Bytes2)
 }
