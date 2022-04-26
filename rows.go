@@ -23,13 +23,13 @@ type Rows struct {
 func newRows(session *Session, bean interface{}) (*Rows, error) {
 	rows := new(Rows)
 	rows.session = session
-	rows.beanType = reflect.Indirect(reflect.ValueOf(bean)).Type()
+	beanValue := reflect.ValueOf(bean)
+	rows.beanType = reflect.Indirect(beanValue).Type()
 
 	var sqlStr string
 	var args []interface{}
 	var err error
 
-	beanValue := reflect.ValueOf(bean)
 	if beanValue.Kind() != reflect.Ptr {
 		return nil, errors.New("needs a pointer to a value")
 	} else if beanValue.Elem().Kind() == reflect.Ptr {
@@ -46,8 +46,8 @@ func newRows(session *Session, bean interface{}) (*Rows, error) {
 
 	if rows.session.statement.RawSQL == "" {
 		var autoCond builder.Cond
-		var addedTableName = (len(session.statement.JoinStr) > 0)
-		var table = rows.session.statement.RefTable
+		addedTableName := (len(session.statement.JoinStr) > 0)
+		table := rows.session.statement.RefTable
 
 		if !session.statement.NoAutoCondition {
 			var err error
@@ -103,15 +103,15 @@ func (rows *Rows) Scan(beans ...interface{}) error {
 		return rows.Err()
 	}
 
-	var bean = beans[0]
-	var tp = reflect.TypeOf(bean)
+	bean := beans[0]
+	tp := reflect.TypeOf(bean)
 	if tp.Kind() == reflect.Ptr {
 		tp = tp.Elem()
 	}
-	var beanKind = tp.Kind()
+	beanKind := tp.Kind()
 
 	if len(beans) == 1 {
-		if reflect.Indirect(reflect.ValueOf(bean)).Type() != rows.beanType {
+		if tp != rows.beanType {
 			return fmt.Errorf("scan arg is incompatible type to [%v]", rows.beanType)
 		}
 

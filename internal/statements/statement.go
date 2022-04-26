@@ -877,7 +877,7 @@ func (statement *Statement) buildConds2(table *schemas.Table, bean interface{},
 			}
 		}
 
-		fieldType := reflect.TypeOf(fieldValue.Interface())
+		fieldType := fieldValue.Type()
 		if fieldType.Kind() == reflect.Ptr {
 			if fieldValue.IsNil() {
 				if includeNil {
