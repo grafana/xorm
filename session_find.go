@@ -307,7 +307,7 @@ func (session *Session) noCacheFind(table *core.Table, containerValue reflect.Va
 			return err
 		}
 	}
-	return nil
+	return rows.Err()
 }
 
 func convertPKToValue(table *core.Table, dst interface{}, pk core.PK) error {
@@ -373,6 +373,9 @@ func (session *Session) cacheFind(t reflect.Type, sqlStr string, rowsSlicePtr in
 			}
 
 			ids = append(ids, pk)
+		}
+		if rows.Err() != nil {
+			return rows.Err()
 		}
 
 		session.engine.logger.Debug("[cacheFind] cache sql:", ids, tableName, sqlStr, newsql, args)

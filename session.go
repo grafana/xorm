@@ -352,7 +352,7 @@ func (session *Session) rows2Beans(rows *core.Rows, fields []string,
 			bean:    bean,
 		})
 	}
-	return nil
+	return rows.Err()
 }
 
 func (session *Session) row2Slice(rows *core.Rows, fields []string, bean interface{}) ([]interface{}, error) {

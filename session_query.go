@@ -206,6 +206,9 @@ func rows2Strings(rows *core.Rows) (resultsSlice []map[string]string, err error)
 		}
 		resultsSlice = append(resultsSlice, result)
 	}
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
 
 	return resultsSlice, nil
 }
@@ -221,6 +224,9 @@ func rows2SliceString(rows *core.Rows) (resultsSlice [][]string, err error) {
 			return nil, err
 		}
 		resultsSlice = append(resultsSlice, record)
+	}
+	if rows.Err() != nil {
+		return nil, rows.Err()
 	}
 
 	return resultsSlice, nil
@@ -294,6 +300,9 @@ func rows2Interfaces(rows *core.Rows) (resultsSlice []map[string]interface{}, er
 			return nil, err
 		}
 		resultsSlice = append(resultsSlice, result)
+	}
+	if rows.Err() != nil {
+		return nil, rows.Err()
 	}
 
 	return resultsSlice, nil
