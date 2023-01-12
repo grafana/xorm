@@ -220,7 +220,7 @@ func TestFindAndCount(t *testing.T) {
 
 	var results []FindAndCount
 	sess := testEngine.Where("name = ?", "test1")
-	conds := sess.Conds()
+	conds := sess.(*Session).Conds()
 	err = sess.Find(&results)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, len(results))

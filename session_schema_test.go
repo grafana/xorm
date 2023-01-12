@@ -23,7 +23,7 @@ func TestStoreEngine(t *testing.T) {
 		Name string
 	}
 
-	assert.NoError(t, testEngine.StoreEngine("InnoDB").Table("user_store_engine").CreateTable(&UserinfoStoreEngine{}))
+	assert.NoError(t, testEngine.StoreEngine("InnoDB").Table("user_store_engine").(*Session).CreateTable(&UserinfoStoreEngine{}))
 }
 
 func TestCreateTable(t *testing.T) {
@@ -36,13 +36,13 @@ func TestCreateTable(t *testing.T) {
 		Name string
 	}
 
-	assert.NoError(t, testEngine.Table("user_user").CreateTable(&UserinfoCreateTable{}))
+	assert.NoError(t, testEngine.Table("user_user").(*Session).CreateTable(&UserinfoCreateTable{}))
 }
 
 func TestCreateMultiTables(t *testing.T) {
 	assert.NoError(t, prepareEngine())
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	type UserinfoMultiTable struct {
@@ -58,7 +58,7 @@ func TestCreateMultiTables(t *testing.T) {
 
 		assert.NoError(t, session.DropTable(tableName))
 
-		assert.NoError(t, session.Table(tableName).CreateTable(user))
+		assert.NoError(t, session.Table(tableName).(*Session).CreateTable(user))
 	}
 
 	assert.NoError(t, session.Commit())
@@ -122,7 +122,7 @@ func TestSyncTable(t *testing.T) {
 func TestSyncTable2(t *testing.T) {
 	assert.NoError(t, prepareEngine())
 
-	assert.NoError(t, testEngine.Table("sync_tablex").Sync2(new(SyncTable1)))
+	assert.NoError(t, testEngine.Table("sync_tablex").(*Session).Sync2(new(SyncTable1)))
 
 	tables, err := testEngine.DBMetas()
 	assert.NoError(t, err)
@@ -135,7 +135,7 @@ func TestSyncTable2(t *testing.T) {
 		NewCol     string
 	}
 
-	assert.NoError(t, testEngine.Table("sync_tablex").Sync2(new(SyncTable4)))
+	assert.NoError(t, testEngine.Table("sync_tablex").(*Session).Sync2(new(SyncTable4)))
 	tables, err = testEngine.DBMetas()
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, len(tables))
@@ -265,7 +265,7 @@ func TestCharst(t *testing.T) {
 		panic(err)
 	}
 
-	err = testEngine.Charset("utf8").Table("user_charset").CreateTable(&Userinfo{})
+	err = testEngine.Charset("utf8").Table("user_charset").(*Session).CreateTable(&Userinfo{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -318,7 +318,7 @@ func TestSync2_2(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		tableName := fmt.Sprintf("test_sync2_index_%d", i)
 		tableNames[tableName] = true
-		assert.NoError(t, testEngine.Table(tableName).Sync2(new(TestSync2Index)))
+		assert.NoError(t, testEngine.Table(tableName).(*Session).Sync2(new(TestSync2Index)))
 
 		exist, err := testEngine.IsTableExist(tableName)
 		assert.NoError(t, err)

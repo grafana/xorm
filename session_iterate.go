@@ -56,7 +56,7 @@ func (session *Session) Iterate(bean interface{}, fun IterFunc) error {
 }
 
 // BufferSize sets the buffersize for iterate
-func (session *Session) BufferSize(size int) *Session {
+func (session *Session) BufferSize(size int) Interface {
 	session.statement.bufferSize = size
 	return session
 }
@@ -78,7 +78,7 @@ func (session *Session) bufferIterate(bean interface{}, fun IterFunc) error {
 
 	for bufferSize > 0 {
 		slice := reflect.New(sliceType)
-		if err := session.NoCache().Limit(bufferSize, start).find(slice.Interface(), bean); err != nil {
+		if err := session.NoCache().Limit(bufferSize, start).(*Session).find(slice.Interface(), bean); err != nil {
 			return err
 		}
 

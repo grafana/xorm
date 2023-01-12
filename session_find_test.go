@@ -82,7 +82,7 @@ func TestWhere(t *testing.T) {
 	}
 	fmt.Println(users)
 
-	err = testEngine.Where("(id) > ?", 2).And("(id) < ?", 10).Find(&users)
+	err = testEngine.Where("(id) > ?", 2).(*Session).And("(id) < ?", 10).Find(&users)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -144,7 +144,7 @@ func TestFind3(t *testing.T) {
 
 	var teams []Team
 	err = testEngine.Cols("`team`.id").
-		Where("`team_user`.org_id=?", 1).
+		Where("`team_user`.org_id=?", 1).(*Session).
 		And("`team_user`.uid=?", 2).
 		Join("INNER", "`team_user`", "`team_user`.team_id=`team`.id").
 		Find(&teams)
@@ -152,7 +152,7 @@ func TestFind3(t *testing.T) {
 
 	teams = make([]Team, 0)
 	err = testEngine.Cols("`team`.id").
-		Where("`team_user`.org_id=?", 1).
+		Where("`team_user`.org_id=?", 1).(*Session).
 		And("`team_user`.uid=?", 2).
 		Join("INNER", teamUser, "`team_user`.team_id=`team`.id").
 		Find(&teams)
@@ -160,7 +160,7 @@ func TestFind3(t *testing.T) {
 
 	teams = make([]Team, 0)
 	err = testEngine.Cols("`team`.id").
-		Where("`team_user`.org_id=?", 1).
+		Where("`team_user`.org_id=?", 1).(*Session).
 		And("`team_user`.uid=?", 2).
 		Join("INNER", []interface{}{teamUser}, "`team_user`.team_id=`team`.id").
 		Find(&teams)
@@ -168,7 +168,7 @@ func TestFind3(t *testing.T) {
 
 	teams = make([]Team, 0)
 	err = testEngine.Cols("`team`.id").
-		Where("`tu`.org_id=?", 1).
+		Where("`tu`.org_id=?", 1).(*Session).
 		And("`tu`.uid=?", 2).
 		Join("INNER", []string{"team_user", "tu"}, "`tu`.team_id=`team`.id").
 		Find(&teams)
@@ -176,7 +176,7 @@ func TestFind3(t *testing.T) {
 
 	teams = make([]Team, 0)
 	err = testEngine.Cols("`team`.id").
-		Where("`tu`.org_id=?", 1).
+		Where("`tu`.org_id=?", 1).(*Session).
 		And("`tu`.uid=?", 2).
 		Join("INNER", []interface{}{"team_user", "tu"}, "`tu`.team_id=`team`.id").
 		Find(&teams)
@@ -184,7 +184,7 @@ func TestFind3(t *testing.T) {
 
 	teams = make([]Team, 0)
 	err = testEngine.Cols("`team`.id").
-		Where("`tu`.org_id=?", 1).
+		Where("`tu`.org_id=?", 1).(*Session).
 		And("`tu`.uid=?", 2).
 		Join("INNER", []interface{}{teamUser, "tu"}, "`tu`.team_id=`team`.id").
 		Find(&teams)
@@ -282,7 +282,7 @@ func TestHaving(t *testing.T) {
 	assertSync(t, new(Userinfo))
 
 	users := make([]Userinfo, 0)
-	err := testEngine.GroupBy("username").Having("username='xlw'").Find(&users)
+	err := testEngine.GroupBy("username").(*Session).Having("username='xlw'").Find(&users)
 	assert.NoError(t, err)
 	fmt.Println(users)
 
@@ -333,7 +333,7 @@ func TestHavingSameMapper(t *testing.T) {
 	assertSync(t, new(Userinfo))
 
 	users := make([]Userinfo, 0)
-	err := testEngine.GroupBy("`Username`").Having("`Username`='xlw'").Find(&users)
+	err := testEngine.GroupBy("`Username`").(*Session).Having("`Username`='xlw'").Find(&users)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -581,7 +581,7 @@ func TestFindAndCountOneFunc(t *testing.T) {
 	assert.EqualValues(t, 1, cnt)
 
 	results = make([]FindAndCountStruct, 0, 1)
-	cnt, err = testEngine.Where("msg = ?", true).Select("id, content, msg").
+	cnt, err = testEngine.Where("msg = ?", true).(*Session).Select("id, content, msg").
 		Limit(1).FindAndCount(&results)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, len(results))
@@ -793,12 +793,12 @@ func TestFindJoin(t *testing.T) {
 
 	var scenes []SceneItem
 	err := testEngine.Join("LEFT OUTER", "device_user_privrels", "device_user_privrels.device_id=scene_item.device_id").
-		Where("scene_item.type=?", 3).Or("device_user_privrels.user_id=?", 339).Find(&scenes)
+		Where("scene_item.type=?", 3).(*Session).Or("device_user_privrels.user_id=?", 339).Find(&scenes)
 	assert.NoError(t, err)
 
 	scenes = make([]SceneItem, 0)
 	err = testEngine.Join("LEFT OUTER", new(DeviceUserPrivrels), "device_user_privrels.device_id=scene_item.device_id").
-		Where("scene_item.type=?", 3).Or("device_user_privrels.user_id=?", 339).Find(&scenes)
+		Where("scene_item.type=?", 3).(*Session).Or("device_user_privrels.user_id=?", 339).Find(&scenes)
 	assert.NoError(t, err)
 }
 

@@ -154,13 +154,13 @@ func (session *Session) After(closures func(interface{})) *Session {
 }
 
 // Table can input a string or pointer to struct for special a table to operate.
-func (session *Session) Table(tableNameOrBean interface{}) *Session {
+func (session *Session) Table(tableNameOrBean interface{}) Interface {
 	session.statement.Table(tableNameOrBean)
 	return session
 }
 
 // Alias set the table alias
-func (session *Session) Alias(alias string) *Session {
+func (session *Session) Alias(alias string) Interface {
 	session.statement.Alias(alias)
 	return session
 }
@@ -178,32 +178,32 @@ func (session *Session) ForUpdate() *Session {
 }
 
 // NoAutoCondition disable generate SQL condition from beans
-func (session *Session) NoAutoCondition(no ...bool) *Session {
+func (session *Session) NoAutoCondition(no ...bool) Interface {
 	session.statement.NoAutoCondition(no...)
 	return session
 }
 
 // Limit provide limit and offset query condition
-func (session *Session) Limit(limit int, start ...int) *Session {
+func (session *Session) Limit(limit int, start ...int) Interface {
 	session.statement.Limit(limit, start...)
 	return session
 }
 
 // OrderBy provide order by query condition, the input parameter is the content
 // after order by on a sql statement.
-func (session *Session) OrderBy(order string) *Session {
+func (session *Session) OrderBy(order string) Interface {
 	session.statement.OrderBy(order)
 	return session
 }
 
 // Desc provide desc order by query condition, the input parameters are columns.
-func (session *Session) Desc(colNames ...string) *Session {
+func (session *Session) Desc(colNames ...string) Interface {
 	session.statement.Desc(colNames...)
 	return session
 }
 
 // Asc provide asc order by query condition, the input parameters are columns.
-func (session *Session) Asc(colNames ...string) *Session {
+func (session *Session) Asc(colNames ...string) Interface {
 	session.statement.Asc(colNames...)
 	return session
 }
@@ -246,13 +246,13 @@ func (session *Session) NoCache() *Session {
 }
 
 // Join join_operator should be one of INNER, LEFT OUTER, CROSS etc - this will be prepended to JOIN
-func (session *Session) Join(joinOperator string, tablename interface{}, condition string, args ...interface{}) *Session {
+func (session *Session) Join(joinOperator string, tablename interface{}, condition string, args ...interface{}) Interface {
 	session.statement.Join(joinOperator, tablename, condition, args...)
 	return session
 }
 
 // GroupBy Generate Group By statement
-func (session *Session) GroupBy(keys string) *Session {
+func (session *Session) GroupBy(keys string) Interface {
 	session.statement.GroupBy(keys)
 	return session
 }
@@ -707,7 +707,7 @@ func (session *Session) slice2Bean(scanResults []interface{}, fields []string, b
 					// however, also need to consider adding a 'lazy' attribute to xorm tag which allow hasOne
 					// property to be fetched lazily
 					structInter := reflect.New(fieldValue.Type())
-					has, err := session.ID(pk).NoCascade().get(structInter.Interface())
+					has, err := session.ID(pk).(*Session).NoCascade().get(structInter.Interface())
 					if err != nil {
 						return nil, err
 					}
@@ -873,7 +873,7 @@ func (session *Session) LastSQL() (string, []interface{}) {
 }
 
 // Unscoped always disable struct tag "deleted"
-func (session *Session) Unscoped() *Session {
+func (session *Session) Unscoped() Interface {
 	session.statement.Unscoped()
 	return session
 }

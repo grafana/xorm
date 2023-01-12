@@ -55,7 +55,7 @@ func TestGetVar(t *testing.T) {
 
 	var age2 int64
 	has, err = testEngine.Table("get_var").Cols("age").
-		Where("age > ?", 20).
+		Where("age > ?", 20).(*Session).
 		And("age < ?", 30).
 		Get(&age2)
 	assert.NoError(t, err)
@@ -70,7 +70,7 @@ func TestGetVar(t *testing.T) {
 
 	var age4 int16
 	has, err = testEngine.Table("get_var").Cols("age").
-		Where("age > ?", 20).
+		Where("age > ?", 20).(*Session).
 		And("age < ?", 30).
 		Get(&age4)
 	assert.NoError(t, err)
@@ -79,7 +79,7 @@ func TestGetVar(t *testing.T) {
 
 	var age5 int32
 	has, err = testEngine.Table("get_var").Cols("age").
-		Where("age > ?", 20).
+		Where("age > ?", 20).(*Session).
 		And("age < ?", 30).
 		Get(&age5)
 	assert.NoError(t, err)
@@ -94,7 +94,7 @@ func TestGetVar(t *testing.T) {
 
 	var age7 int64
 	has, err = testEngine.Table("get_var").Cols("age").
-		Where("age > ?", 20).
+		Where("age > ?", 20).(*Session).
 		And("age < ?", 30).
 		Get(&age7)
 	assert.NoError(t, err)
@@ -109,7 +109,7 @@ func TestGetVar(t *testing.T) {
 
 	var age9 int16
 	has, err = testEngine.Table("get_var").Cols("age").
-		Where("age > ?", 20).
+		Where("age > ?", 20).(*Session).
 		And("age < ?", 30).
 		Get(&age9)
 	assert.NoError(t, err)
@@ -118,7 +118,7 @@ func TestGetVar(t *testing.T) {
 
 	var age10 int32
 	has, err = testEngine.Table("get_var").Cols("age").
-		Where("age > ?", 20).
+		Where("age > ?", 20).(*Session).
 		And("age < ?", 30).
 		Get(&age10)
 	assert.NoError(t, err)
@@ -180,7 +180,7 @@ func TestGetVar(t *testing.T) {
 	// for mymysql driver, interface{} will be []byte, so ignore it currently
 	if testEngine.Dialect().DriverName() != "mymysql" {
 		var valuesInter = make(map[string]interface{})
-		has, err = testEngine.Table("get_var").Where("id = ?", 1).Select("*").Get(&valuesInter)
+		has, err = testEngine.Table("get_var").Where("id = ?", 1).(*Session).Select("*").Get(&valuesInter)
 		assert.NoError(t, err)
 		assert.Equal(t, true, has)
 		assert.Equal(t, 5, len(valuesInter))
@@ -229,7 +229,7 @@ func TestGetStruct(t *testing.T) {
 
 	assert.NoError(t, testEngine.Sync2(new(UserinfoGet)))
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	var err error
@@ -414,13 +414,13 @@ func TestContextGet(t *testing.T) {
 	_, err := testEngine.Insert(&ContextGetStruct{Name: "1"})
 	assert.NoError(t, err)
 
-	sess := testEngine.NewSession()
+	sess := testEngine.NewSession().(*Session)
 	defer sess.Close()
 
 	context := NewMemoryContextCache()
 
 	var c2 ContextGetStruct
-	has, err := sess.ID(1).NoCache().ContextCache(context).Get(&c2)
+	has, err := sess.ID(1).(*Session).NoCache().ContextCache(context).Get(&c2)
 	assert.NoError(t, err)
 	assert.True(t, has)
 	assert.EqualValues(t, 1, c2.Id)
@@ -430,7 +430,7 @@ func TestContextGet(t *testing.T) {
 	assert.True(t, len(args) > 0)
 
 	var c3 ContextGetStruct
-	has, err = sess.ID(1).NoCache().ContextCache(context).Get(&c3)
+	has, err = sess.ID(1).(*Session).NoCache().ContextCache(context).Get(&c3)
 	assert.NoError(t, err)
 	assert.True(t, has)
 	assert.EqualValues(t, 1, c3.Id)
@@ -455,14 +455,14 @@ func TestContextGet2(t *testing.T) {
 	context := NewMemoryContextCache()
 
 	var c2 ContextGetStruct2
-	has, err := testEngine.ID(1).NoCache().ContextCache(context).Get(&c2)
+	has, err := testEngine.ID(1).(*Session).NoCache().ContextCache(context).Get(&c2)
 	assert.NoError(t, err)
 	assert.True(t, has)
 	assert.EqualValues(t, 1, c2.Id)
 	assert.EqualValues(t, "1", c2.Name)
 
 	var c3 ContextGetStruct2
-	has, err = testEngine.ID(1).NoCache().ContextCache(context).Get(&c3)
+	has, err = testEngine.ID(1).(*Session).NoCache().ContextCache(context).Get(&c3)
 	assert.NoError(t, err)
 	assert.True(t, has)
 	assert.EqualValues(t, 1, c3.Id)
@@ -486,7 +486,7 @@ func (MyGetCustomTableImpletation) TableName() string {
 
 func TestGetCustomTableInterface(t *testing.T) {
 	assert.NoError(t, prepareEngine())
-	assert.NoError(t, testEngine.Table(getCustomTableName).Sync2(new(MyGetCustomTableImpletation)))
+	assert.NoError(t, testEngine.Table(getCustomTableName).(*Session).Sync2(new(MyGetCustomTableImpletation)))
 
 	exist, err := testEngine.IsTableExist(getCustomTableName)
 	assert.NoError(t, err)
@@ -613,7 +613,7 @@ func TestCustomTypes(t *testing.T) {
 	assert.EqualValues(t, "test", name)
 
 	var age MyInt
-	has, err = testEngine.Table(new(TestCustomizeStruct)).ID(s.Id).Select("age").Get(&age)
+	has, err = testEngine.Table(new(TestCustomizeStruct)).ID(s.Id).(*Session).Select("age").Get(&age)
 	assert.NoError(t, err)
 	assert.True(t, has)
 	assert.EqualValues(t, 32, age)

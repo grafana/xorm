@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build go1.8
 // +build go1.8
 
 package xorm
@@ -9,8 +10,8 @@ package xorm
 import "context"
 
 // Context creates a session with the context
-func (engine *Engine) Context(ctx context.Context) *Session {
-	session := engine.NewSession()
+func (engine *Engine) Context(ctx context.Context) Interface {
+	session := engine.NewSession().(*Session)
 	session.isAutoClose = true
 	return session.Context(ctx)
 }
@@ -22,7 +23,7 @@ func (engine *Engine) SetDefaultContext(ctx context.Context) {
 
 // PingContext tests if database is alive
 func (engine *Engine) PingContext(ctx context.Context) error {
-	session := engine.NewSession()
+	session := engine.NewSession().(*Session)
 	defer session.Close()
 	return session.PingContext(ctx)
 }

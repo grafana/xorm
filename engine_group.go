@@ -76,15 +76,15 @@ func (eg *EngineGroup) Close() error {
 }
 
 // Context returned a group session
-func (eg *EngineGroup) Context(ctx context.Context) *Session {
-	sess := eg.NewSession()
+func (eg *EngineGroup) Context(ctx context.Context) Interface {
+	sess := eg.NewSession().(*Session)
 	sess.isAutoClose = true
 	return sess.Context(ctx)
 }
 
 // NewSession returned a group session
-func (eg *EngineGroup) NewSession() *Session {
-	sess := eg.Engine.NewSession()
+func (eg *EngineGroup) NewSession() Interface {
+	sess := eg.Engine.NewSession().(*Session)
 	sess.sessionType = groupSession
 	return sess
 }

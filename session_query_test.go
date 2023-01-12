@@ -240,7 +240,7 @@ func TestQuerySliceStringNoParam(t *testing.T) {
 	_, err := testEngine.Insert(data)
 	assert.NoError(t, err)
 
-	records, err := testEngine.Table("get_var6").Limit(1).QuerySliceString()
+	records, err := testEngine.Table("get_var6").Limit(1).(*Session).QuerySliceString()
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, len(records))
 	assert.EqualValues(t, "1", records[0][0])
@@ -250,7 +250,7 @@ func TestQuerySliceStringNoParam(t *testing.T) {
 		assert.EqualValues(t, "0", records[0][1])
 	}
 
-	records, err = testEngine.Table("get_var6").Where(builder.Eq{"id": 1}).QuerySliceString()
+	records, err = testEngine.Table("get_var6").Where(builder.Eq{"id": 1}).(*Session).QuerySliceString()
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, len(records))
 	assert.EqualValues(t, "1", records[0][0])

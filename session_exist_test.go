@@ -114,7 +114,7 @@ func TestExistStructForJoin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, cnt)
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	session.Table("number").
@@ -133,7 +133,7 @@ func TestExistStructForJoin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, has)
 
-	session.Table("number").
+	session.Table("number").(*Session).
 		Select("order_list.id").
 		Join("INNER", "order_list", "order_list.id = number.lid").
 		Join("LEFT", "player", "player.id = order_list.eid").
@@ -142,7 +142,7 @@ func TestExistStructForJoin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, has)
 
-	session.Table("number").
+	session.Table("number").(*Session).
 		Select("player.id").
 		Join("INNER", "order_list", "order_list.id = number.lid").
 		Join("LEFT", "player", "player.id = order_list.eid").
@@ -151,7 +151,7 @@ func TestExistStructForJoin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, has)
 
-	session.Table("number").
+	session.Table("number").(*Session).
 		Select("player.id").
 		Join("INNER", "order_list", "order_list.id = number.lid").
 		Join("LEFT", "player", "player.id = order_list.eid")
@@ -166,7 +166,7 @@ func TestExistStructForJoin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, exist)
 
-	session.Table("number").
+	session.Table("number").(*Session).
 		Select("player.id").
 		Join("INNER", "order_list", "order_list.id = number.lid").
 		Join("LEFT", "player", "player.id = order_list.eid")
@@ -174,7 +174,7 @@ func TestExistStructForJoin(t *testing.T) {
 	assert.Error(t, err)
 	assert.False(t, has)
 
-	session.Table("number").
+	session.Table("number").(*Session).
 		Select("player.id").
 		Join("LEFT", "player", "player.id = number.lid")
 	has, err = session.Exist()
