@@ -229,7 +229,7 @@ func (session *Session) bytes2Value(col *core.Column, fieldValue *reflect.Value,
 					// however, also need to consider adding a 'lazy' attribute to xorm tag which allow hasOne
 					// property to be fetched lazily
 					structInter := reflect.New(fieldValue.Type())
-					has, err := session.ID(pk).NoCascade().get(structInter.Interface())
+					has, err := session.ID(pk).(*Session).NoCascade().get(structInter.Interface())
 					if err != nil {
 						return err
 					}
@@ -510,7 +510,7 @@ func (session *Session) bytes2Value(col *core.Column, fieldValue *reflect.Value,
 						// !nashtsai! TODO for hasOne relationship, it's preferred to use join query for eager fetch
 						// however, also need to consider adding a 'lazy' attribute to xorm tag which allow hasOne
 						// property to be fetched lazily
-						has, err := session.ID(pk).NoCascade().get(structInter.Interface())
+						has, err := session.ID(pk).(*Session).NoCascade().get(structInter.Interface())
 						if err != nil {
 							return err
 						}

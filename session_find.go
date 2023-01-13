@@ -454,7 +454,7 @@ func (session *Session) cacheFind(t reflect.Type, sqlStr string, rowsSlicePtr in
 			}
 		}
 
-		err = session.NoCache().Table(tableName).find(beans)
+		err = session.NoCache().Table(tableName).(*Session).find(beans)
 		if err != nil {
 			return err
 		}

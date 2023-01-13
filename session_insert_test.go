@@ -57,7 +57,7 @@ func insertMultiDatas(step int, datas interface{}) (num int64, err error) {
 		return
 	}
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	if err = callbackLooper(datas, step,
@@ -820,7 +820,8 @@ func TestInsertMap(t *testing.T) {
 	assert.EqualValues(t, "lunny", ims[3].Name)
 }
 
-/*INSERT INTO `issue` (`repo_id`, `poster_id`, ... ,`name`, `content`, ... ,`index`)
+/*
+INSERT INTO `issue` (`repo_id`, `poster_id`, ... ,`name`, `content`, ... ,`index`)
 SELECT $1, $2, ..., $14, $15, ..., MAX(`index`) + 1 FROM `issue` WHERE `repo_id` = $1;
 */
 func TestInsertWhere(t *testing.T) {
@@ -998,9 +999,9 @@ func TestMultipleInsertTableName(t *testing.T) {
 	assert.NoError(t, prepareEngine())
 
 	tableName := `prd_nightly_rate_16`
-	assert.NoError(t, testEngine.Table(tableName).Sync2(new(NightlyRate)))
+	assert.NoError(t, testEngine.Table(tableName).(*Session).Sync2(new(NightlyRate)))
 
-	trans := testEngine.NewSession()
+	trans := testEngine.NewSession().(*Session)
 	defer trans.Close()
 	err := trans.Begin()
 	assert.NoError(t, err)
@@ -1088,7 +1089,7 @@ func TestInsertTwice(t *testing.T) {
 		},
 	}
 
-	ssn := testEngine.NewSession()
+	ssn := testEngine.NewSession().(*Session)
 	defer ssn.Close()
 
 	err := ssn.Begin()

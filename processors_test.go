@@ -153,7 +153,7 @@ func TestProcessors(t *testing.T) {
 		}
 	}
 
-	_, err = testEngine.Before(b4InsertFunc).After(afterInsertFunc).Insert(p)
+	_, err = testEngine.Before(b4InsertFunc).(*Session).After(afterInsertFunc).Insert(p)
 	assert.NoError(t, err)
 	assert.True(t, p.Id > 0, "Inserted ID not set")
 	assert.True(t, p.B4InsertFlag > 0, "B4InsertFlag not set")
@@ -256,7 +256,7 @@ func TestProcessors(t *testing.T) {
 
 	p = p2 // reset
 
-	_, err = testEngine.Before(b4UpdateFunc).After(afterUpdateFunc).Update(p)
+	_, err = testEngine.Before(b4UpdateFunc).(*Session).After(afterUpdateFunc).Update(p)
 	assert.NoError(t, err)
 
 	if p.B4UpdateFlag == 0 {
@@ -281,13 +281,13 @@ func TestProcessors(t *testing.T) {
 		t.Error(errors.New("B4UpdateFlag not set"))
 	}
 	if p2.AfterUpdatedFlag != 0 {
-		t.Error(errors.New("AfterUpdatedFlag is set: " + string(p.AfterUpdatedFlag)))
+		t.Error(errors.New("AfterUpdatedFlag is set: " + fmt.Sprint(p.AfterUpdatedFlag)))
 	}
 	if p2.B4UpdateViaExt == 0 {
 		t.Error(errors.New("B4UpdateViaExt not set"))
 	}
 	if p2.AfterUpdatedViaExt != 0 {
-		t.Error(errors.New("AfterUpdatedViaExt is set: " + string(p.AfterUpdatedViaExt)))
+		t.Error(errors.New("AfterUpdatedViaExt is set: " + fmt.Sprint(p.AfterUpdatedViaExt)))
 	}
 	if p2.BeforeSetFlag != 9 {
 		t.Error(fmt.Errorf("BeforeSetFlag is %d not 9", p2.BeforeSetFlag))
@@ -315,7 +315,7 @@ func TestProcessors(t *testing.T) {
 	}
 
 	p = p2 // reset
-	_, err = testEngine.Before(b4DeleteFunc).After(afterDeleteFunc).Delete(p)
+	_, err = testEngine.Before(b4DeleteFunc).(*Session).After(afterDeleteFunc).Delete(p)
 	assert.NoError(t, err)
 	if p.B4DeleteFlag == 0 {
 		t.Error(errors.New("B4DeleteFlag not set"))
@@ -335,7 +335,7 @@ func TestProcessors(t *testing.T) {
 	pslice := make([]*ProcessorsStruct, 0)
 	pslice = append(pslice, &ProcessorsStruct{})
 	pslice = append(pslice, &ProcessorsStruct{})
-	cnt, err := testEngine.Before(b4InsertFunc).After(afterInsertFunc).Insert(&pslice)
+	cnt, err := testEngine.Before(b4InsertFunc).(*Session).After(afterInsertFunc).Insert(&pslice)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 2, cnt, "incorrect insert count")
 
@@ -392,9 +392,9 @@ func TestProcessorsTx(t *testing.T) {
 
 	// test insert processors with tx rollback
 	session := testEngine.NewSession()
-	defer session.Close()
+	defer session.(*Session).Close()
 
-	err = session.Begin()
+	err = session.(*Session).Begin()
 	assert.NoError(t, err)
 
 	p := &ProcessorsStruct{}
@@ -413,7 +413,7 @@ func TestProcessorsTx(t *testing.T) {
 			t.Error(errors.New("cast to ProcessorsStruct failed, how can this be!?"))
 		}
 	}
-	_, err = session.Before(b4InsertFunc).After(afterInsertFunc).Insert(p)
+	_, err = session.(*Session).Before(b4InsertFunc).After(afterInsertFunc).Insert(p)
 	assert.NoError(t, err)
 
 	if p.B4InsertFlag == 0 {
@@ -429,7 +429,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterInsertedViaExt is set"))
 	}
 
-	err = session.Rollback()
+	err = session.(*Session).Rollback()
 	assert.NoError(t, err)
 
 	if p.B4InsertFlag == 0 {
@@ -445,7 +445,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterInsertedViaExt is set"))
 	}
 
-	session.Close()
+	session.(*Session).Close()
 
 	p2 := &ProcessorsStruct{}
 	_, err = testEngine.ID(p.Id).Get(p2)
@@ -460,13 +460,13 @@ func TestProcessorsTx(t *testing.T) {
 
 	// test insert processors with tx commit
 	session = testEngine.NewSession()
-	defer session.Close()
+	defer session.(*Session).Close()
 
-	err = session.Begin()
+	err = session.(*Session).Begin()
 	assert.NoError(t, err)
 
 	p = &ProcessorsStruct{}
-	_, err = session.Before(b4InsertFunc).After(afterInsertFunc).Insert(p)
+	_, err = session.(*Session).Before(b4InsertFunc).After(afterInsertFunc).Insert(p)
 	assert.NoError(t, err)
 
 	if p.B4InsertFlag == 0 {
@@ -482,7 +482,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterInsertedViaExt is set"))
 	}
 
-	err = session.Commit()
+	err = session.(*Session).Commit()
 	assert.NoError(t, err)
 
 	if p.B4InsertFlag == 0 {
@@ -498,7 +498,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterInsertedViaExt not set"))
 	}
 
-	session.Close()
+	session.(*Session).Close()
 	p2 = &ProcessorsStruct{}
 	_, err = testEngine.ID(p.Id).Get(p2)
 	assert.NoError(t, err)
@@ -521,9 +521,9 @@ func TestProcessorsTx(t *testing.T) {
 
 	// test update processors with tx rollback
 	session = testEngine.NewSession()
-	defer session.Close()
+	defer session.(*Session).Close()
 
-	err = session.Begin()
+	err = session.(*Session).Begin()
 	assert.NoError(t, err)
 
 	b4UpdateFunc := func(bean interface{}) {
@@ -544,7 +544,7 @@ func TestProcessorsTx(t *testing.T) {
 
 	p = p2 // reset
 
-	_, err = session.ID(insertedId).Before(b4UpdateFunc).After(afterUpdateFunc).Update(p)
+	_, err = session.ID(insertedId).(*Session).Before(b4UpdateFunc).After(afterUpdateFunc).Update(p)
 	assert.NoError(t, err)
 
 	if p.B4UpdateFlag == 0 {
@@ -560,7 +560,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterUpdatedViaExt is set"))
 	}
 
-	err = session.Rollback()
+	err = session.(*Session).Rollback()
 	assert.NoError(t, err)
 
 	if p.B4UpdateFlag == 0 {
@@ -576,7 +576,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterUpdatedViaExt is set"))
 	}
 
-	session.Close()
+	session.(*Session).Close()
 
 	p2 = &ProcessorsStruct{}
 	_, err = testEngine.ID(insertedId).Get(p2)
@@ -598,9 +598,9 @@ func TestProcessorsTx(t *testing.T) {
 
 	// test update processors with tx rollback
 	session = testEngine.NewSession()
-	defer session.Close()
+	defer session.(*Session).Close()
 
-	err = session.Begin()
+	err = session.(*Session).Begin()
 	assert.NoError(t, err)
 
 	p = &ProcessorsStruct{Id: insertedId}
@@ -615,7 +615,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterUpdatedFlag is set"))
 	}
 
-	err = session.Commit()
+	err = session.(*Session).Commit()
 	assert.NoError(t, err)
 
 	if p.B4UpdateFlag == 0 {
@@ -631,18 +631,18 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterInsertedFlag set"))
 	}
 
-	session.Close()
+	session.(*Session).Close()
 
 	// test update processors with tx commit
 	session = testEngine.NewSession()
-	defer session.Close()
+	defer session.(*Session).Close()
 
-	err = session.Begin()
+	err = session.(*Session).Begin()
 	assert.NoError(t, err)
 
 	p = &ProcessorsStruct{}
 
-	_, err = session.ID(insertedId).Before(b4UpdateFunc).After(afterUpdateFunc).Update(p)
+	_, err = session.ID(insertedId).(*Session).Before(b4UpdateFunc).After(afterUpdateFunc).Update(p)
 	assert.NoError(t, err)
 
 	if p.B4UpdateFlag == 0 {
@@ -658,7 +658,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterUpdatedViaExt is set"))
 	}
 
-	err = session.Commit()
+	err = session.(*Session).Commit()
 	assert.NoError(t, err)
 
 	if p.B4UpdateFlag == 0 {
@@ -674,7 +674,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterUpdatedViaExt not set"))
 	}
 
-	session.Close()
+	session.(*Session).Close()
 	p2 = &ProcessorsStruct{}
 	_, err = testEngine.ID(insertedId).Get(p2)
 	assert.NoError(t, err)
@@ -695,9 +695,9 @@ func TestProcessorsTx(t *testing.T) {
 
 	// test delete processors with tx rollback
 	session = testEngine.NewSession()
-	defer session.Close()
+	defer session.(*Session).Close()
 
-	err = session.Begin()
+	err = session.(*Session).Begin()
 	assert.NoError(t, err)
 
 	b4DeleteFunc := func(bean interface{}) {
@@ -718,7 +718,7 @@ func TestProcessorsTx(t *testing.T) {
 
 	p = &ProcessorsStruct{} // reset
 
-	_, err = session.ID(insertedId).Before(b4DeleteFunc).After(afterDeleteFunc).Delete(p)
+	_, err = session.ID(insertedId).(*Session).Before(b4DeleteFunc).After(afterDeleteFunc).Delete(p)
 	assert.NoError(t, err)
 
 	if p.B4DeleteFlag == 0 {
@@ -734,7 +734,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterDeletedViaExt is set"))
 	}
 
-	err = session.Rollback()
+	err = session.(*Session).Rollback()
 	assert.NoError(t, err)
 	if p.B4DeleteFlag == 0 {
 		t.Error(errors.New("B4DeleteFlag not set"))
@@ -749,7 +749,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterDeletedViaExt is set"))
 	}
 
-	session.Close()
+	session.(*Session).Close()
 
 	p2 = &ProcessorsStruct{}
 	_, err = testEngine.ID(insertedId).Get(p2)
@@ -771,14 +771,14 @@ func TestProcessorsTx(t *testing.T) {
 
 	// test delete processors with tx commit
 	session = testEngine.NewSession()
-	defer session.Close()
+	defer session.(*Session).Close()
 
-	err = session.Begin()
+	err = session.(*Session).Begin()
 	assert.NoError(t, err)
 
 	p = &ProcessorsStruct{}
 
-	_, err = session.ID(insertedId).Before(b4DeleteFunc).After(afterDeleteFunc).Delete(p)
+	_, err = session.ID(insertedId).(*Session).Before(b4DeleteFunc).After(afterDeleteFunc).Delete(p)
 	assert.NoError(t, err)
 
 	if p.B4DeleteFlag == 0 {
@@ -794,7 +794,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterDeletedViaExt is set"))
 	}
 
-	err = session.Commit()
+	err = session.(*Session).Commit()
 	assert.NoError(t, err)
 
 	if p.B4DeleteFlag == 0 {
@@ -810,13 +810,13 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterDeletedViaExt not set"))
 	}
 
-	session.Close()
+	session.(*Session).Close()
 
 	// test delete processors with tx commit
 	session = testEngine.NewSession()
-	defer session.Close()
+	defer session.(*Session).Close()
 
-	err = session.Begin()
+	err = session.(*Session).Begin()
 	assert.NoError(t, err)
 
 	p = &ProcessorsStruct{Id: insertedId}
@@ -830,7 +830,7 @@ func TestProcessorsTx(t *testing.T) {
 		t.Error(errors.New("AfterDeletedFlag is set"))
 	}
 
-	err = session.Commit()
+	err = session.(*Session).Commit()
 	assert.NoError(t, err)
 
 	if p.B4DeleteFlag == 0 {
@@ -845,7 +845,7 @@ func TestProcessorsTx(t *testing.T) {
 	if p.AfterUpdatedFlag != 0 {
 		t.Error(errors.New("AfterUpdatedFlag set"))
 	}
-	session.Close()
+	session.(*Session).Close()
 	// --
 }
 

@@ -55,7 +55,7 @@ func TestRows(t *testing.T) {
 	assert.EqualValues(t, 0, cnt)
 	assert.NoError(t, rows0.Close())
 
-	sess := testEngine.NewSession()
+	sess := testEngine.NewSession().(*Session)
 	defer sess.Close()
 
 	rows1, err := sess.Prepare().Rows(new(UserRows))
@@ -94,7 +94,7 @@ func TestRowsMyTableName(t *testing.T) {
 
 	var tableName = "user_rows_my_table_name"
 
-	assert.NoError(t, testEngine.Table(tableName).Sync2(new(UserRowsMyTable)))
+	assert.NoError(t, testEngine.Table(tableName).(*Session).Sync2(new(UserRowsMyTable)))
 
 	cnt, err := testEngine.Table(tableName).Insert(&UserRowsMyTable{
 		IsMan: true,

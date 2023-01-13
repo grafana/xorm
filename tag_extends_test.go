@@ -158,7 +158,7 @@ func TestExtends(t *testing.T) {
 	udid := "detail_id"
 	sql := fmt.Sprintf("select * from %s, %s where %s.%s = %s.%s",
 		qt(ui), qt(ud), qt(ui), qt(udid), qt(ud), qt(uiid))
-	b, err := testEngine.SQL(sql).NoCascade().Get(&info)
+	b, err := testEngine.SQL(sql).(*Session).NoCascade().Get(&info)
 	assert.NoError(t, err)
 	if !b {
 		err = errors.New("should has lest one record")
@@ -175,8 +175,7 @@ func TestExtends(t *testing.T) {
 	fmt.Println("----join--info2")
 	var info2 UserAndDetail
 	b, err = testEngine.Table(&Userinfo{}).
-		Join("LEFT", qt(ud), qt(ui)+"."+qt("detail_id")+" = "+qt(ud)+"."+qt(uiid)).
-		NoCascade().Get(&info2)
+		Join("LEFT", qt(ud), qt(ui)+"."+qt("detail_id")+" = "+qt(ud)+"."+qt(uiid)).(*Session).NoCascade().Get(&info2)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -196,7 +195,7 @@ func TestExtends(t *testing.T) {
 	fmt.Println("----join--infos2")
 	var infos2 = make([]UserAndDetail, 0)
 	err = testEngine.Table(&Userinfo{}).
-		Join("LEFT", qt(ud), qt(ui)+"."+qt("detail_id")+" = "+qt(ud)+"."+qt(uiid)).
+		Join("LEFT", qt(ud), qt(ui)+"."+qt("detail_id")+" = "+qt(ud)+"."+qt(uiid)).(*Session).
 		NoCascade().
 		Find(&infos2)
 	assert.NoError(t, err)
@@ -265,7 +264,7 @@ func TestExtends2(t *testing.T) {
 		ToUid:   receiver.Id,
 	}
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	// MSSQL deny insert identity column excep declare as below
@@ -335,7 +334,7 @@ func TestExtends3(t *testing.T) {
 		ToUid:   receiver.Id,
 	}
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	// MSSQL deny insert identity column excep declare as below
@@ -429,7 +428,7 @@ func TestExtends4(t *testing.T) {
 		Uid:     sender.Id,
 	}
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	// MSSQL deny insert identity column excep declare as below
@@ -544,7 +543,7 @@ func TestExtends5(t *testing.T) {
 		bk5.ID: bk5,
 	}
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	var mapper = testEngine.GetTableMapper().Obj2Table

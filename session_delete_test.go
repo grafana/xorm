@@ -22,7 +22,7 @@ func TestDelete(t *testing.T) {
 
 	assert.NoError(t, testEngine.Sync2(new(UserinfoDelete)))
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	var err error
@@ -149,7 +149,7 @@ func TestDeleted(t *testing.T) {
 	assert.EqualValues(t, 2, len(unscopedRecords2))
 
 	var records3 []Deleted
-	err = testEngine.Where("`"+testEngine.GetColumnMapper().Obj2Table("Id")+"` > 0").And("`"+testEngine.GetColumnMapper().Obj2Table("Id")+"`> 1").
+	err = testEngine.Where("`"+testEngine.GetColumnMapper().Obj2Table("Id")+"` > 0").(*Session).And("`"+testEngine.GetColumnMapper().Obj2Table("Id")+"`> 1").
 		Or("`"+testEngine.GetColumnMapper().Obj2Table("Id")+"` = ?", 3).Find(&records3)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 2, len(records3))

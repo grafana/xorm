@@ -14,11 +14,11 @@ import (
 func TestClose(t *testing.T) {
 	assert.NoError(t, prepareEngine())
 
-	sess1 := testEngine.NewSession()
+	sess1 := testEngine.NewSession().(*Session)
 	sess1.Close()
 	assert.True(t, sess1.IsClosed())
 
-	sess2 := testEngine.Where("a = ?", 1)
+	sess2 := testEngine.Where("a = ?", 1).(*Session)
 	sess2.Close()
 	assert.True(t, sess2.IsClosed())
 }

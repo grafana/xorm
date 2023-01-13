@@ -329,24 +329,6 @@ func TestNullStructFind(t *testing.T) {
 	}
 }
 
-func TestNullStructIterate(t *testing.T) {
-	assert.NoError(t, prepareEngine())
-	assertSync(t, new(NullType))
-
-	if true {
-		err := testEngine.Where("age IS NOT NULL").OrderBy("age").Iterate(new(NullType),
-			func(i int, bean interface{}) error {
-				nultype := bean.(*NullType)
-				fmt.Println(i, nultype)
-				return nil
-			})
-		if err != nil {
-			t.Error(err)
-			panic(err)
-		}
-	}
-}
-
 func TestNullStructCount(t *testing.T) {
 	assert.NoError(t, prepareEngine())
 	assertSync(t, new(NullType))

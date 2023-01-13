@@ -120,9 +120,9 @@ func TestForUpdate(t *testing.T) {
 		return
 	}
 
-	session1 := testEngine.NewSession()
-	session2 := testEngine.NewSession()
-	session3 := testEngine.NewSession()
+	session1 := testEngine.NewSession().(*Session)
+	session2 := testEngine.NewSession().(*Session)
+	session3 := testEngine.NewSession().(*Session)
 	defer session1.Close()
 	defer session2.Close()
 	defer session3.Close()
@@ -158,7 +158,7 @@ func TestForUpdate(t *testing.T) {
 	wg.Add(1)
 	go func() {
 		f2 := new(ForUpdate)
-		session2.Where("(id) = ?", 1).ForUpdate()
+		session2.Where("(id) = ?", 1).(*Session).ForUpdate()
 		has, err := session2.Get(f2) // wait release lock
 		switch {
 		case err != nil:
@@ -324,7 +324,7 @@ func TestUpdate1(t *testing.T) {
 		}
 		userID := user.Uid
 
-		has, err := testEngine.ID(userID).
+		has, err := testEngine.ID(userID).(*Session).
 			And("username = ?", user.Username).
 			And("height = ?", user.Height).
 			And("departname = ?", "").
@@ -342,7 +342,7 @@ func TestUpdate1(t *testing.T) {
 		}
 
 		updatedUser := &Userinfo{Username: "null data"}
-		cnt, err = testEngine.ID(userID).
+		cnt, err = testEngine.ID(userID).(*Session).
 			Nullable("height", "departname", "is_man", "created").
 			Update(updatedUser)
 		if err != nil {
@@ -355,7 +355,7 @@ func TestUpdate1(t *testing.T) {
 			panic(err)
 		}
 
-		has, err = testEngine.ID(userID).
+		has, err = testEngine.ID(userID).(*Session).
 			And("username = ?", updatedUser.Username).
 			And("height IS NULL").
 			And("departname IS NULL").
@@ -385,7 +385,7 @@ func TestUpdate1(t *testing.T) {
 		}
 	}
 
-	err = testEngine.StoreEngine("Innodb").Sync2(&Article{})
+	err = testEngine.StoreEngine("Innodb").(*Session).Sync2(&Article{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -1063,7 +1063,7 @@ func TestDeletedUpdate(t *testing.T) {
 	assert.EqualValues(t, 1, cnt)
 
 	s.DeletedAt = time.Time{}
-	cnt, err = testEngine.Unscoped().Nullable("deleted_at").Update(&s)
+	cnt, err = testEngine.Unscoped().(*Session).Nullable("deleted_at").Update(&s)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, cnt)
 

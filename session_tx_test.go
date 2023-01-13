@@ -28,7 +28,7 @@ func TestTransaction(t *testing.T) {
 	counter()
 	//defer counter()
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	err := session.Begin()
@@ -63,7 +63,7 @@ func TestCombineTransaction(t *testing.T) {
 
 	counter()
 	//defer counter()
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	err := session.Begin()
@@ -108,7 +108,7 @@ func TestCombineTransactionSameMapper(t *testing.T) {
 	counter()
 	defer counter()
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	err := session.Begin()
@@ -139,7 +139,7 @@ func TestMultipleTransaction(t *testing.T) {
 
 	assertSync(t, new(MultipleTransaction))
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	err := session.Begin()

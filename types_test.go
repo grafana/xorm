@@ -308,7 +308,7 @@ func TestCustomType2(t *testing.T) {
 	_, err = testEngine.Exec("delete from " + testEngine.Quote(tableName))
 	assert.NoError(t, err)
 
-	session := testEngine.NewSession()
+	session := testEngine.NewSession().(*Session)
 	defer session.Close()
 
 	if testEngine.Dialect().DBType() == core.MSSQL {
