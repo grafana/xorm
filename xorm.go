@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build go1.8
 // +build go1.8
 
 package xorm
@@ -30,6 +31,7 @@ func regDrvsNDialects() bool {
 		getDialect func() core.Dialect
 	}{
 		"mssql":    {"mssql", func() core.Driver { return &odbcDriver{} }, func() core.Dialect { return &mssql{} }},
+		"azuresql": {"azuresql", func() core.Driver { return &odbcDriver{} }, func() core.Dialect { return &mssql{} }},
 		"odbc":     {"mssql", func() core.Driver { return &odbcDriver{} }, func() core.Dialect { return &mssql{} }}, // !nashtsai! TODO change this when supporting MS Access
 		"mysql":    {"mysql", func() core.Driver { return &mysqlDriver{} }, func() core.Dialect { return &mysql{} }},
 		"mymysql":  {"mysql", func() core.Driver { return &mymysqlDriver{} }, func() core.Dialect { return &mysql{} }},
