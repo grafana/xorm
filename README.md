@@ -1,4 +1,6 @@
-# xorm
+# [DEPRECATED] xorm
+
+### This repository is deprecated, please use [github.com/grafana/grafana/pkg/util/xorm](https://github.com/grafana/grafana/tree/main/pkg/util/xorm) instead.
 
 [中文](https://gitea.com/xorm/xorm/src/branch/master/README_CN.md)
 
